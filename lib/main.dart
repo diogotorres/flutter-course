@@ -6,9 +6,7 @@ class ByteBankApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: ListaTransferencia(),
-      ),
+      home: ListaTransferencia(),
     );
   }
 }
@@ -22,24 +20,26 @@ class FormularioTransferencia extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Criando Transferência'),),
-        body: Column(
-          children: [
-            Editor(
-              controlador: _controladorCampoNumeroConta,
-              rotulo: 'Número da conta',
-              dica: '000',
-            ),
-            Editor(
-              controlador: _controladorCampoValor,
-              rotulo: 'Valor',
-              dica: '0.00',
-              icone: Icons.monetization_on,
-            ),
-            RaisedButton(
-              child: Text('Confirmar'),
-              onPressed: () => _criaTransferencia(context),
-            )
-          ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Editor(
+                controlador: _controladorCampoNumeroConta,
+                rotulo: 'Número da conta',
+                dica: '000',
+              ),
+              Editor(
+                controlador: _controladorCampoValor,
+                rotulo: 'Valor',
+                dica: '0.00',
+                icone: Icons.monetization_on,
+              ),
+              RaisedButton(
+                child: Text('Confirmar'),
+                onPressed: () => _criaTransferencia(context),
+              )
+            ],
+          ),
         )
     );
   }
@@ -54,17 +54,27 @@ class FormularioTransferencia extends StatelessWidget {
   }
 }
 
-class ListaTransferencia extends StatelessWidget {
+class ListaTransferencia extends StatefulWidget {
+  final List<Transferencia> _transferencias = List();
+
+  @override
+  State<StatefulWidget> createState() {
+    return ListaTransferenciasState();
+  }
+}
+
+class ListaTransferenciasState extends State<ListaTransferencia> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Transferências'),),
-      body: Column(
-        children: <Widget>[
-          ItemTransferencia(Transferencia(100.0, 123)),
-          ItemTransferencia(Transferencia(200.0, 456)),
-          ItemTransferencia(Transferencia(300.0, 789)),
-        ],
+      appBar: AppBar(
+        title: Text('Transferências'),
+      ),
+      body: ListView.builder(
+        itemCount: widget._transferencias.length,
+        itemBuilder: (context, indice) {
+          return ItemTransferencia(widget._transferencias[indice]);
+        },
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -79,10 +89,12 @@ class ListaTransferencia extends StatelessWidget {
           );
           future.then((novaTransferencia) {
             debugPrint('$novaTransferencia');
-            Scaffold.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('$novaTransferencia'))
-            );
+            if (novaTransferencia != null) {
+              //necessário utilizar o setState para renderizar a tela novamente
+              setState(() {
+                widget._transferencias.add(novaTransferencia);
+              });
+            }
           });
         },
       ),
